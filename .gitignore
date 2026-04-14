@@ -1,0 +1,13 @@
+# Go
+
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.out
+*.swp
+.env
+*.prof
+*.swo
+.DS_Store
