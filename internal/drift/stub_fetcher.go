@@ -1,16 +1,20 @@
 package drift
 
-import "fmt"
+// StubFetcher is a test double for fetcher.Fetcher.
+// It returns pre-configured responses keyed by URL.
+type StubFetcher struct {
+	Responses map[string]map[string]interface{}
+	Errors    map[string]error
+}
 
-// StubFetcher is a no-op Fetcher used as a placeholder until real
-// provider integrations (e.g. Kubernetes, Consul) are implemented.
-// It returns an empty param map for every service, causing all
-// declared fields to appear as drifted (missing).
-type StubFetcher struct{}
-
-// Fetch satisfies the Fetcher interface by returning an empty map.
-// Replace this with a real implementation once a provider is wired up.
-func (s *StubFetcher) Fetch(serviceName string) (map[string]string, error) {
-	fmt.Printf("[stub] fetching live config for service %q (returning empty)\n", serviceName)
-	return map[string]string{}, nil
+// Fetch returns the stubbed response for the given URL, or an error if one
+// has been configured.
+func (s *StubFetcher) Fetch(url string) (map[string]interface{}, error) {
+	if err, ok := s.Errors[url]; ok {
+		return nil, err
+	}
+	if resp, ok := s.Responses[url]; ok {
+		return resp, nil
+	}
+	return map[string]interface{}{}, nil
 }
