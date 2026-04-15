@@ -12,7 +12,7 @@ func makeEntry(name string) baseline.Entry {
 	return baseline.Entry{
 		ServiceName: name,
 		Fields: map[string]interface{}{
-			"version": "1.2.3",
+			"version":  "1.2.3",
 			"replicas": float64(3),
 		},
 	}
@@ -81,6 +81,18 @@ func TestList_ReturnsAll(t *testing.T) {
 	}
 	if len(entries) != 2 {
 		t.Errorf("expected 2 entries, got %d", len(entries))
+	}
+}
+
+func TestList_Empty(t *testing.T) {
+	dir := t.TempDir()
+	store, _ := baseline.New(dir)
+	entries, err := store.List()
+	if err != nil {
+		t.Fatalf("List on empty store: %v", err)
+	}
+	if len(entries) != 0 {
+		t.Errorf("expected 0 entries on empty store, got %d", len(entries))
 	}
 }
 
