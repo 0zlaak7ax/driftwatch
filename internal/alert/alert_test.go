@@ -83,3 +83,13 @@ func TestEvaluate_CriticalFieldCaseInsensitive(t *testing.T) {
 		t.Errorf("expected critical for case-insensitive match, got %s", alerts[0].Level)
 	}
 }
+
+// TestEvaluate_EmptyResults verifies that evaluating an empty result set
+// produces no alerts and does not panic.
+func TestEvaluate_EmptyResults(t *testing.T) {
+	a := alert.New(&bytes.Buffer{}, []string{"image"})
+	alerts := a.Evaluate([]drift.Result{})
+	if len(alerts) != 0 {
+		t.Fatalf("expected 0 alerts for empty results, got %d", len(alerts))
+	}
+}
