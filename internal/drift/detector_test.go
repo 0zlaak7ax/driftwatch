@@ -102,3 +102,30 @@ func TestDetect_FetchError(t *testing.T) {
 		t.Errorf("expected unknown on fetch error, got %s", results[0].Status)
 	}
 }
+
+func TestDetect_MultipleServices(t *testing.T) {
+	cfg := makeConfig([]config.Service{
+		{Name: "api", Params: map[string]string{"replicas": "3"}},
+		{Name: "worker", Params: map[string]string{"replicas": "5"}},
+	})
+	fetcher := &mockFetcher{
+		data: map[string]map[string]string{
+			"api":    {"replicas": "3"},
+			"worker": {"replicas": "2"},
+		},
+	}
+
+	results, err := drift.New(fetcher).Detect(cfg)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(results) != 2 {
+		t.Fatalf("expected 2 results, got %d", len(results))
+	}
+	if results[0].Status != drift.StatusInSync {
+		t.Errorf("expected api to be in_sync, got %s", results[0].Status)
+	}
+	if results[1].Status != drift.StatusDrifted {
+		t.Errorf("expected worker to be drifted, got %s", results[1].Status)
+	}
+}
