@@ -29,6 +29,8 @@ func New(timeout time.Duration) *HTTPFetcher {
 
 // Fetch performs a GET request to url and decodes the JSON response body
 // into a flat map of string keys to interface{} values.
+// It returns an error if the request fails, the status code is not 200 OK,
+// or the response body cannot be decoded as JSON.
 func (f *HTTPFetcher) Fetch(url string) (map[string]interface{}, error) {
 	resp, err := f.client.Get(url)
 	if err != nil {
@@ -37,7 +39,7 @@ func (f *HTTPFetcher) Fetch(url string) (map[string]interface{}, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("fetcher: GET %s returned status %d", url, resp.StatusCode)
+		return nil, fmt.Errorf("fetcher: GET %s returned status %d (%s)", url, resp.StatusCode, http.StatusText(resp.StatusCode))
 	}
 
 	var result map[string]interface{}
