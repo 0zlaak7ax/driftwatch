@@ -73,3 +73,22 @@ func (c *Collector) Reset() {
 	defer c.mu.Unlock()
 	c.runs = nil
 }
+
+// Summary returns aggregate totals across all recorded runs.
+// It returns false if no runs have been recorded yet.
+func (c *Collector) Summary() (RunMetrics, bool) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if len(c.runs) == 0 {
+		return RunMetrics{}, false
+	}
+	var agg RunMetrics
+	for _, r := range c.runs {
+		agg.ServicesTotal += r.ServicesTotal
+		agg.ServicesDrifted += r.ServicesDrifted
+		agg.ServicesInSync += r.ServicesInSync
+		agg.FieldsChecked += r.FieldsChecked
+		agg.FieldsDrifted += r.FieldsDrifted
+	}
+	return agg, true
+}
