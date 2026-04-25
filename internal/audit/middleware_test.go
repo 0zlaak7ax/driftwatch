@@ -63,6 +63,21 @@ func TestDetectHook_NilLog(t *testing.T) {
 	}
 }
 
+func TestDetectHook_EmptyResults(t *testing.T) {
+	dir := t.TempDir()
+	log, _ := audit.New(dir)
+	if err := audit.DetectHook(log, []drift.Result{}); err != nil {
+		t.Fatalf("DetectHook with empty results: %v", err)
+	}
+	events, _ := log.List()
+	if len(events) != 1 {
+		t.Fatalf("expected 1 event, got %d", len(events))
+	}
+	if events[0].Message != "all services in sync" {
+		t.Errorf("unexpected message: %q", events[0].Message)
+	}
+}
+
 func TestBaselineHook_SaveAndDelete(t *testing.T) {
 	dir := t.TempDir()
 	log, _ := audit.New(dir)
