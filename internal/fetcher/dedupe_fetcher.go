@@ -31,6 +31,8 @@ func NewDedupe(inner Fetcher) (*DedupeFetcher, error) {
 }
 
 // Fetch delegates to inner, deduplicating concurrent calls for the same url.
+// If multiple goroutines call Fetch with the same url simultaneously, only one
+// upstream request is made; the rest wait and share the result.
 func (d *DedupeFetcher) Fetch(url string) (map[string]interface{}, error) {
 	d.mu.Lock()
 	if c, ok := d.flying[url]; ok {
@@ -51,4 +53,11 @@ func (d *DedupeFetcher) Fetch(url string) (map[string]interface{}, error) {
 	d.mu.Unlock()
 
 	return c.res, c.err
+}
+
+// InFlight returns the number of URLs currently being fetched.
+func (d *DedupeFetcher) InFlight() int {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	return len(d.flying)
 }
